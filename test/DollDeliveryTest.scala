@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException
+
 import org.scalatest._
 
 /**
@@ -199,5 +201,46 @@ class DollDeliveryTest extends FlatSpec with Matchers {
     actualOutput("E").distance should equal(expectedOutput("E").distance)
     actualOutput("F").distance should equal(expectedOutput("F").distance)
     actualOutput("G").distance should equal(expectedOutput("G").distance)
+  }
+
+  info("Testing Main Function")
+
+  "main" should "throw an illegal argument exception if not enough arguments are provided." in {
+    val error = intercept[IllegalArgumentException] {
+      DollDelivery.main(Array[String]())
+    }
+    error.getMessage shouldEqual "Not enough arguments present. Expecting the following 3: Start, End, Edge file."
+  }
+
+  "main" should "throw a file not found exception if the edge file does not exist." in {
+    val error = intercept[FileNotFoundException] {
+      DollDelivery.main(Array[String]("A", "F", "rsc/edge-set-3"))
+    }
+    error.getMessage shouldEqual "File cannot be found. Please check path rsc/edge-set-3"
+  }
+
+  "main" should "produce output with a distance of 31" in {
+    val stream = new java.io.ByteArrayOutputStream()
+    Console.withOut(stream) {
+      DollDelivery.main(Array[String]("Kruthika's abode", "Craig's haunt", "rsc/edge-set-0"))
+    }
+    stream.toString shouldEqual "Distance: 31\nPath: Kruthika's abode => Brian's apartment => Wesley's condo =>" +
+      " Bryce's den => Craig's haunt\n"
+  }
+
+  "main" should "produce output with a distance of 11" in {
+    val stream = new java.io.ByteArrayOutputStream()
+    Console.withOut(stream) {
+      DollDelivery.main(Array[String]("A", "F", "rsc/edge-set-1"))
+    }
+    stream.toString shouldEqual "Distance: 11\nPath: A => B => D => F\n"
+  }
+
+  "main" should "produce output with a distance of 6" in {
+    val stream = new java.io.ByteArrayOutputStream()
+    Console.withOut(stream) {
+      DollDelivery.main(Array[String]("U", "Z", "rsc/edge-set-2"))
+    }
+    stream.toString shouldEqual "Distance: 6\nPath: U => V => Y => Z\n"
   }
 }

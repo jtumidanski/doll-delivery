@@ -2,41 +2,45 @@
  * Created by jtumidanski on 9/9/15.
  */
 
+import java.io.FileNotFoundException
+import java.io.File
+import scala.io._
+
 object DollDelivery {
   def main(args: Array[String]): Unit = {
-    val startingLocation = "Kruthika's abode"
-    val targetLocation = "Craig's haunt"
-    val edges = List(
-      Map("startLocation" -> "Kruthika's abode", "endLocation" -> "Mark's crib", "distance" -> 9),
-      Map("startLocation" -> "Kruthika's abode", "endLocation" -> "Greg's casa", "distance" -> 4),
-      Map("startLocation" -> "Kruthika's abode", "endLocation" -> "Matt's pad", "distance" -> 18),
-      Map("startLocation" -> "Kruthika's abode", "endLocation" -> "Brian's apartment", "distance" -> 8),
-      Map("startLocation" -> "Brian's apartment", "endLocation" -> "Wesley's condo", "distance" -> 7),
-      Map("startLocation" -> "Brian's apartment", "endLocation" -> "Cam's dwelling", "distance" -> 17),
-      Map("startLocation" -> "Greg's casa", "endLocation" -> "Cam's dwelling", "distance" -> 13),
-      Map("startLocation" -> "Greg's casa", "endLocation" -> "Mike's digs", "distance" -> 19),
-      Map("startLocation" -> "Greg's casa", "endLocation" -> "Matt's pad", "distance" -> 14),
-      Map("startLocation" -> "Wesley's condo", "endLocation" -> "Kirk's farm", "distance" -> 10),
-      Map("startLocation" -> "Wesley's condo", "endLocation" -> "Nathan's flat", "distance" -> 11),
-      Map("startLocation" -> "Wesley's condo", "endLocation" -> "Bryce's den", "distance" -> 6),
-      Map("startLocation" -> "Matt's pad", "endLocation" -> "Mark's crib", "distance" -> 19),
-      Map("startLocation" -> "Matt's pad", "endLocation" -> "Nathan's flat", "distance" -> 15),
-      Map("startLocation" -> "Matt's pad", "endLocation" -> "Craig's haunt", "distance" -> 14),
-      Map("startLocation" -> "Mark's crib", "endLocation" -> "Kirk's farm", "distance" -> 9),
-      Map("startLocation" -> "Mark's crib", "endLocation" -> "Nathan's flat", "distance" -> 12),
-      Map("startLocation" -> "Bryce's den", "endLocation" -> "Craig's haunt", "distance" -> 10),
-      Map("startLocation" -> "Bryce's den", "endLocation" -> "Mike's digs", "distance" -> 9),
-      Map("startLocation" -> "Mike's digs", "endLocation" -> "Cam's dwelling", "distance" -> 20),
-      Map("startLocation" -> "Mike's digs", "endLocation" -> "Nathan's flat", "distance" -> 12),
-      Map("startLocation" -> "Cam's dwelling", "endLocation" -> "Craig's haunt", "distance" -> 18),
-      Map("startLocation" -> "Nathan's flat", "endLocation" -> "Kirk's farm", "distance" -> 3)
-    )
+
+    // Ensure proper arguments are present.
+    if (args.length != 3) {
+      throw new IllegalArgumentException("Not enough arguments present. Expecting the following 3: Start, End, Edge " +
+        "file.")
+    }
+    else if (! new File(args(2)).exists) {
+      throw new FileNotFoundException(s"File cannot be found. Please check path ${args(2)}")
+    }
+
+    // Create empty edge list of maps.
+    var edges = List[Map[String, Any]]()
+
+    // Load file.
+    val file = Source.fromFile(args(2))
+
+    // For each line in the file, add a edge to the map.
+    file.getLines.foreach((line) => {
+      val linePieces = line.split(",")
+      edges = edges ++ List(Map(
+        "startLocation" -> linePieces(0).trim,
+        "endLocation" -> linePieces(1).trim,
+        "distance" -> linePieces(2).trim.toInt))
+    })
 
     // Construct the graph.
-    val graph = new Graph(startingLocation, targetLocation, edges)
+    val graph = new Graph(args(0), args(1), edges)
+
+    // Find the shortest path.
     findShortestPath(graph)
   }
 
+  // Given a graph, find the shortest path from a starting vertex to an ending vertex.
   def findShortestPath(graph: Graph) {
     // Initial step, no vertices are settled.
     val settled = Map[String, Vertex]()
@@ -44,14 +48,16 @@ object DollDelivery {
     val unSettled = Map(graph.start -> graph.vertices(graph.start))
 
     val shortestPathTree = generateTree(graph.vertices, graph.edges, settled, unSettled)
-    println(printPath(graph.target, shortestPathTree))
+    printPath(graph.target, shortestPathTree)
   }
 
   // Prints the path to the specified vertex.
   def printPath(vertexName: String, shortestPathTree: Map[String, Vertex]) = {
     val destination = shortestPathTree(vertexName)
     val pathString = constructPathList(destination)
-    Map("distance" -> destination.distance, "path" -> pathString)
+    //Map("distance" -> destination.distance, "path" -> pathString)
+    println(s"Distance: ${destination.distance}")
+    println(s"Path: ${pathString}")
   }
 
   // Traverses the predecessor tree for the vertex. Creates a string
