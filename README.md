@@ -38,7 +38,7 @@ Navigate to the doll-delivery root. Execute the following commands:
     $ scalac -d classes -classpath $SCALA_TEST_JAR:classes test/DollDeliveryTest.scala
     
 ### Executing
-Navigate to the classes folder. Execute the following command:
+Execute the following command:
 
     $ scala -classpath classes DollDelivery [start] [end] [edge file]
     Distance: [distance]
@@ -59,7 +59,7 @@ Navigate to the classes folder. Execute the following command:
     Path: U => V => Y => Z
 
 ### Testing
-Navigate to the classes folder. Execute the following commands:
+Execute the following command:
 
     $ scala -classpath $SCALA_TEST_JAR:classes org.scalatest.run DollDeliveryTest
     Run starting. Expected test count is: 22
